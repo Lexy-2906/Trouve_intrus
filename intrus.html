@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trouve l'Intrus - Spécial DC (avec intrus Marvel)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #050a1a, #1a0510);
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #ffcc00;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-align: center;
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+        }
+        .subtitle {
+            color: #00ccff;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        .game-container {
+            width: 100%;
+            max-width: 750px;
+            background: rgba(20, 20, 30, 0.9);
+            border-radius: 15px;
+            border: 2px solid #333;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .counter {
+            font-weight: bold;
+            color: #888;
+            margin-bottom: 15px;
+        }
+        .instruction {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            color: #ddd;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .option-btn {
+            padding: 18px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background-color: #222a38;
+            color: white;
+            border: 2px solid #445566;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .option-btn:hover {
+            background-color: #334455;
+            border-color: #ffcc00;
+        }
+        .option-btn.correct {
+            background-color: #00802b !important;
+            border-color: #66ff99 !important;
+            box-shadow: 0 0 15px #00802b;
+        }
+        .option-btn.wrong {
+            background-color: #cc0000 !important;
+            border-color: #ff6666 !important;
+            opacity: 0.6;
+        }
+        .reveal-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: rgba(255, 204, 0, 0.1);
+            border: 1px solid #ffcc00;
+            color: #ffcc00;
+            display: none;
+        }
+        .nav-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+            width: 100%;
+            max-width: 750px;
+        }
+        .btn-nav {
+            padding: 10px 20px;
+            background-color: #222;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .btn-nav:hover {
+            background-color: #444;
+            border-color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Trouve l'Intrus — Spécial DC</h1>
+    <div class="subtitle">Déniche l'intrus Marvel parmi les éléments DC</div>
+
+    <div class="game-container">
+        <div class="counter" id="counterDisplay">Manche 1 / 15</div>
+        <div class="instruction">Quel élément appartient à Marvel et n'a rien à faire ici ?</div>
+        
+        <div class="options-grid" id="optionsGrid"></div>
+
+        <div class="reveal-box" id="revealBox"></div>
+    </div>
+
+    <div class="nav-controls">
+        <button class="btn-nav" onclick="prevRound()">← Précédent</button>
+        <button class="btn-nav" onclick="nextRound()">Suivant →</button>
+    </div>
+
+    <script>
+        const rounds = [
+            {
+                options: ["Batman", "Superman", "Wonder Woman", "Iron Man"],
+                intrusIndex: 3,
+                explanation: "Iron Man est un super-héros de l'univers Marvel ; les trois autres sont les figures de proue de DC."
+            },
+            {
+                options: ["Gotham City", "Metropolis", "Central City", "Wakanda"],
+                intrusIndex: 3,
+                explanation: "Le Wakanda est la nation technologique de Black Panther chez Marvel."
+            },
+            {
+                options: ["Le Joker", "Lex Luthor", "Thanos", "L'Homme-Mystère (Riddler)"],
+                intrusIndex: 2,
+                explanation: "Thanos est le grand méchant de l'univers Marvel, les trois autres affrontent Batman ou Superman chez DC."
+            },
+            {
+                options: ["Le Batarang", "Le lasso de la vérité", "Le bouclier de Captain America", "Le trident d'Aquaman"],
+                intrusIndex: 2,
+                explanation: "Le bouclier en vibranium appartient à Captain America chez Marvel."
+            },
+            {
+                options: ["Themyscira", "Krypton", "Atlantis", "Asgard"],
+                intrusIndex: 3,
+                explanation: "Asgard est le royaume d'Odin et Thor dans l'univers Marvel."
+            },
+            {
+                options: ["Alfred Pennyworth", "J. Jonah Jameson", "James Gordon", "Lois Lane"],
+                intrusIndex: 1,
+                explanation: "J. Jonah Jameson est le rédacteur en chef tyrannique du Daily Bugle chez Marvel (Spider-Man)."
+            },
+            {
+                options: ["Kryptonite", "Vibranium", "Batarang explosif", "Lazarus Pit (Puits de Lazare)"],
+                intrusIndex: 1,
+                explanation: "Le Vibranium est le métal précieux du Wakanda chez Marvel."
+            },
+            {
+                options: ["Flash", "Green Lantern", "Cyborg", "Doctor Strange"],
+                intrusIndex: 3,
+                explanation: "Doctor Strange est le maître des arts mystiques chez Marvel."
+            },
+            {
+                options: ["Le Daily Planet", "S.T.A.R. Labs", "LexCorp", "Stark Industries"],
+                intrusIndex: 3,
+                explanation: "Stark Industries est la multinationale de Tony Stark chez Marvel."
+            },
+            {
+                options: ["Harley Quinn", "Poison Ivy", "Catwoman", "Black Widow"],
+                intrusIndex: 3,
+                explanation: "Black Widow (Natasha Romanoff) est l'espionne emblématique des Avengers chez Marvel."
+            },
+            {
+                options: ["La Batmobile", "Le Tumbler", "Le Quinjet", "Le Batwing"],
+                intrusIndex: 2,
+                explanation: "Le Quinjet est l'appareil de transport officiel des Avengers chez Marvel."
+            },
+            {
+                options: ["Darkseid", "Brainiac", "Le Mandarin", "Gog"],
+                intrusIndex: 2,
+                explanation: "Le Mandarin est un antagoniste historique de l'univers d'Iron Man chez Marvel."
+            },
+            {
+                options: ["Arrowcave", "La Batcave", "La Tour de Justice", "Le Manoir des X-Men"],
+                intrusIndex: 3,
+                explanation: "Le Manoir des X-Men est la base historique des mutants chez Marvel."
+            },
+            {
+                options: ["Dick Grayson", "Jason Todd", "Tim Drake", "Peter Parker"],
+                intrusIndex: 3,
+                explanation: "Peter Parker (Spider-Man) évolue dans l'univers Marvel."
+            },
+            {
+                options: ["La Ligue des Justiciers", "La Suicide Squad", "Les Teen Titans", "Les Gardiens de la Galaxie"],
+                intrusIndex: 3,
+                explanation: "Les Gardiens de la Galaxie patrouillent dans l'espace cosmique chez Marvel."
+            }
+        ];
+
+        let currentRound = 0;
+        let answered = false;
+
+        function loadRound(index) {
+            currentRound = index;
+            answered = false;
+            const round = rounds[index];
+
+            document.getElementById('counterDisplay').textContent = `Manche ${index + 1} / ${rounds.length}`;
+            document.getElementById('revealBox').style.display = 'none';
+
+            const grid = document.getElementById('optionsGrid');
+            grid.innerHTML = '';
+
+            round.options.forEach((option, i) => {
+                let btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = option;
+                btn.onclick = () => selectOption(i, btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        function selectOption(selectedIndex, btnElement) {
+            if (answered) return;
+            answered = true;
+
+            const round = rounds[currentRound];
+            const buttons = document.querySelectorAll('.option-btn');
+
+            buttons.forEach((btn, i) => {
+                if (i === round.intrusIndex) {
+                    btn.classList.add('correct');
+                } else if (i === selectedIndex && i !== round.intrusIndex) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            const reveal = document.getElementById('revealBox');
+            reveal.style.display = 'block';
+            reveal.textContent = `🎯 Intrus : ${round.options[round.intrusIndex]} — ${round.explanation}`;
+        }
+
+        function nextRound() {
+            if (currentRound < rounds.length - 1) {
+                loadRound(currentRound + 1);
+            }
+        }
+
+        function prevRound() {
+            if (currentRound > 0) {
+                loadRound(currentRound - 1);
+            }
+        }
+
+        window.onload = () => loadRound(0);
+    </script>
+</body>
+</html>
